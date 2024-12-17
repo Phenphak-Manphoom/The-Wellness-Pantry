@@ -146,3 +146,41 @@ export const getUserProfile = catchAsyncErrors(async (req, res, next) => {
     user,
   });
 });
+
+// Update Password  =>  /api/password/update
+export const updatePassword = catchAsyncErrors(async (req, res, next) => {
+  // ตรวจสอบ input ที่จำเป็น
+  const { oldPassword, password } = req.body;
+
+  if (!oldPassword || !password) {
+    return next(
+      new ErrorHandler("Please provide both old and new password", 400)
+    );
+  }
+
+  // ค้นหา user และโหลด field password
+  const user = await User.findById(req.user._id).select("+password");
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  // ตรวจสอบ old password
+  const isPasswordMatched = await user.comparePassword(oldPassword);
+
+  if (!isPasswordMatched) {
+    return next(new ErrorHandler("Old password is incorrect", 400));
+  }
+
+  // ตั้งรหัสผ่านใหม่
+  user.password = password;
+
+  // บันทึกข้อมูล user
+  await user.save();
+
+  // ส่ง response
+  res.status(200).json({
+    success: true,
+    message: "Password updated successfully",
+  });
+});
