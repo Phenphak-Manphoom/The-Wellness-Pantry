@@ -184,3 +184,33 @@ export const updatePassword = catchAsyncErrors(async (req, res, next) => {
     message: "Password updated successfully",
   });
 });
+
+// Update User Profile  =>  /api/me/update
+export const updateProfile = catchAsyncErrors(async (req, res, next) => {
+  const { name, email } = req.body;
+
+  // ตรวจสอบ input ที่จำเป็น
+  if (!name || !email) {
+    return next(new ErrorHandler("Name and Email are required", 400));
+  }
+
+  // เตรียมข้อมูลใหม่สำหรับอัปเดต
+  const newUserData = { name, email };
+
+  // อัปเดตข้อมูลในฐานข้อมูล
+  const user = await User.findByIdAndUpdate(req.user._id, newUserData, {
+    new: true, // ส่งข้อมูลใหม่กลับมา
+    runValidators: true, // ตรวจสอบ validation schema ใน model
+  });
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  // ส่ง response
+  res.status(200).json({
+    success: true,
+    message: "Profile updated successfully",
+    user,
+  });
+});
