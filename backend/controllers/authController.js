@@ -214,3 +214,84 @@ export const updateProfile = catchAsyncErrors(async (req, res, next) => {
     user,
   });
 });
+
+// Get all Users - ADMIN  =>  /api/admin/users
+export const allUsers = catchAsyncErrors(async (req, res, next) => {
+  const { page = 1, limit = 10, keyword = "" } = req.query;
+
+  // กรองผู้ใช้ด้วย keyword
+  const query = keyword ? { name: { $regex: keyword, $options: "i" } } : {};
+
+  // ดึงข้อมูลผู้ใช้
+  const users = await User.find(query)
+    .skip((page - 1) * limit)
+    .limit(Number(limit));
+
+  // ส่งจำนวนผู้ใช้ทั้งหมดสำหรับ pagination
+  const totalUsers = await User.countDocuments(query);
+
+  res.status(200).json({
+    success: true,
+    totalUsers,
+    users,
+    totalPages: Math.ceil(totalUsers / limit),
+    currentPage: Number(page),
+  });
+});
+
+// Get User Details - ADMIN  =>  /api/admin/users/:id
+export const getUserDetails = catchAsyncErrors(async (req, res, next) => {
+  const { id } = req.params;
+
+  const user = await User.findById(id);
+
+  if (!user) {
+    return next(new ErrorHandler(`User not found with ID: ${id}`, 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+// Update User Details - ADMIN  =>  /api/admin/users/:id
+export const updateUser = catchAsyncErrors(async (req, res, next) => {
+  const { name, email, role } = req.body;
+  const { id } = req.params;
+
+  const newUserData = { name, email, role };
+
+  const user = await User.findByIdAndUpdate(id, newUserData, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!user) {
+    return next(new ErrorHandler(`User not found with ID: ${id}`, 404));
+  }
+  res.status(200).json({
+    success: true,
+    message: "User updated successfully",
+    user: user,
+  });
+});
+
+// Delete User - ADMIN  =>  /api/admin/users/:id
+export const deleteUser = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(
+      new ErrorHandler(`User not found with id: ${req.params.id}`, 404)
+    );
+  }
+
+  // TODO - Remove user avatar from cloudinary
+
+  await user.deleteOne();
+
+  res.status(200).json({
+    success: true,
+  });
+});
