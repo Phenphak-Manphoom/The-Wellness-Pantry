@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import productRoutes from "./routes/productRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 import { connectDatabase } from "./config/dbConnect.js";
 import errorMiddleware from "./middlewares/errors.js";
 
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use("/api", productRoutes);
 app.use("/api", authRoutes);
+app.use("/api", orderRoutes);
 
 //using error middleware
 app.use(errorMiddleware);
