@@ -17,9 +17,15 @@ const orderSchema = new mongoose.Schema(
     orderItems: [
       {
         name: { type: String, required: true },
+        size: {
+          type: String,
+          required: true,
+          enum: ["small", "medium", "large"], // ขนาดที่รองรับ
+        },
+        price: { type: Number, required: true },
         quantity: { type: Number, required: true },
         image: { type: String, required: true },
-        price: { type: Number, required: true }, // เปลี่ยนเป็น Number เพื่อคำนวณได้ง่ายขึ้น
+
         product: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
