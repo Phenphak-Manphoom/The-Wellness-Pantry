@@ -72,3 +72,109 @@ export const deleteProduct = catchAsyncErrors(async (req, res) => {
     message: "Product Deleted",
   });
 });
+
+// Create/Update product review   =>  /api/reviews
+export const createProductReview = catchAsyncErrors(async (req, res, next) => {
+  const { rating, comment, productId } = req.body;
+
+  if (!rating || !comment || !productId) {
+    return next(new ErrorHandler("All fields are required", 400));
+  }
+
+  const review = {
+    user: req?.user?._id,
+    rating: Number(rating),
+    comment,
+  };
+
+  const product = await Product.findById(productId);
+
+  if (!product) {
+    return next(new ErrorHandler("Product not found", 404));
+  }
+
+  // Check if the user has already reviewed the product
+  const existingReviewIndex = product.reviews.findIndex(
+    (r) => r.user.toString() === req.user._id.toString()
+  );
+
+  if (existingReviewIndex !== -1) {
+    // Update the existing review
+    product.reviews[existingReviewIndex].comment = comment;
+    product.reviews[existingReviewIndex].rating = rating;
+  } else {
+    // Add a new review
+    product.reviews.push(review);
+    product.numOfReviews = product.reviews.length;
+  }
+
+  // Update product ratings
+  product.ratings =
+    product.reviews.reduce((acc, item) => item.rating + acc, 0) /
+    product.reviews.length;
+
+  await product.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    success: true,
+    message: "Review added/updated successfully",
+  });
+});
+
+// Get product reviews   =>  /api/reviews
+export const getProductReviews = catchAsyncErrors(async (req, res) => {
+  const { id } = req.query;
+
+  if (!id) {
+    return next(new ErrorHandler("Product ID is required", 400));
+  }
+
+  const product = await Product.findById(id);
+
+  if (!product) {
+    return next(new ErrorHandler("Product not found", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    reviews: product.reviews,
+  });
+});
+
+// Delete product review   =>  /api/admin/reviews
+export const deleteReview = catchAsyncErrors(async (req, res) => {
+  const { productId, id: reviewId } = req.query;
+
+  if (!productId || !reviewId) {
+    return next(new ErrorHandler("Product ID and Review ID are required", 400));
+  }
+
+  const product = await Product.findById(productId);
+
+  if (!product) {
+    return next(new ErrorHandler("Product not found", 404));
+  }
+
+  const reviews = product.reviews.filter(
+    (review) => review._id.toString() !== reviewId.toString()
+  );
+
+  const numOfReviews = reviews.length;
+
+  const ratings =
+    numOfReviews === 0
+      ? 0
+      : product.reviews.reduce((acc, item) => item.rating + acc, 0) /
+        numOfReviews;
+
+  await Product.findByIdAndUpdate(
+    productId,
+    { reviews, numOfReviews, ratings },
+    { new: true }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Review deleted successfully",
+  });
+});
