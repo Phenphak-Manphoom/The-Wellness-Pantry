@@ -21,3 +21,13 @@ export const connectDatabase = async () => {
     process.exit(1); // Exit process with failure
   }
 };
+
+// ฟังก์ชันสำหรับปิดการเชื่อมต่อฐานข้อมูล
+export const disconnectDatabase = async () => {
+  try {
+    await mongoose.connection.close();
+    console.log("MongoDB connection closed.");
+  } catch (error) {
+    console.error(`Error closing MongoDB connection: ${error.message}`);
+  }
+};
