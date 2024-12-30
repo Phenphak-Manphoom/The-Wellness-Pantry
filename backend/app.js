@@ -4,41 +4,68 @@ import cookieParser from "cookie-parser";
 import productRoutes from "./routes/productRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
-import { connectDatabase } from "./config/dbConnect.js";
+import { connectDatabase, disconnectDatabase } from "./config/dbConnect.js";
 import errorMiddleware from "./middlewares/errors.js";
-
-const app = express();
-
-// Handle Uncaught exceptions
-process.on("uncaughtException", (err) => {
-  console.log(`ERROR: ${err}`);
-  console.log("Shutting down due to uncaught expection");
-  process.exit(1);
-});
 
 dotenv.config({ path: "backend/config/config.env" });
 
-connectDatabase();
+const app = express();
+
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
 app.use("/api", productRoutes);
 app.use("/api", authRoutes);
 app.use("/api", orderRoutes);
 
-//using error middleware
+// Error handling middleware
 app.use(errorMiddleware);
 
+// Connect to database
+connectDatabase();
+
+// Graceful shutdown function
+const gracefulShutdown = async (server) => {
+  console.log("Shutting down gracefully...");
+
+  try {
+    // ปิด session กับฐานข้อมูล
+    await disconnectDatabase();
+
+    // ปิดเซิร์ฟเวอร์
+    server.close(() => {
+      console.log("Server shut down.");
+      process.exit(0); // ปิดโปรแกรมสำเร็จ
+    });
+  } catch (error) {
+    console.error(`Error during shutdown: ${error.message}`);
+    process.exit(1); // ปิดโปรแกรมด้วยข้อผิดพลาด
+  }
+};
+
+// Start server
 const server = app.listen(process.env.PORT, () => {
   console.log(
     `Server started on PORT: ${process.env.PORT} in ${process.env.NODE_ENV} mode.`
   );
 });
 
-//Handle Unhandled Promise rejections
+// Handle uncaught exceptions
+process.on("uncaughtException", (err) => {
+  console.error(`Uncaught Exception: ${err.message}`);
+  console.error("Shutting down due to uncaught exception...");
+  gracefulShutdown(server);
+});
+
+// Handle unhandled promise rejections
 process.on("unhandledRejection", (err) => {
-  console.log(`ERROR: ${err}`);
-  console.log("Shutting down server due to Unhandled Promise Rejection");
-  server.close(() => {
-    process.exit(1);
-  });
+  console.error(`Unhandled Promise Rejection: ${err.message}`);
+  console.error("Shutting down due to unhandled rejection...");
+  gracefulShutdown(server);
+});
+
+// Handle SIGINT (e.g., Ctrl+C)
+process.on("SIGINT", () => {
+  console.log("SIGINT received. Shutting down...");
+  gracefulShutdown(server);
 });
