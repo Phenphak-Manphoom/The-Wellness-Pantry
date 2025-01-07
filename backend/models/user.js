@@ -36,9 +36,16 @@ const userSchema = mongoose.Schema(
 );
 
 // Encrypting password before saving the user
-userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
-  this.password = await bcrypt.hash(this.password, 10);
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+
+  try {
+    const SALT_ROUNDS = process.env.SALT_ROUNDS || 10;
+    this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Return JWT Token
