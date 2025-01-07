@@ -47,12 +47,24 @@ export const newOrder = catchAsyncErrors(async (req, res, next) => {
 
 // Get current user orders  =>  /api/me/orders
 export const myOrders = catchAsyncErrors(async (req, res, next) => {
-  const userId = req.user._id;
-  const orders = await Order.find({ user: userId });
+  const { page = 1, limit = 10 } = req.query; // กำหนดค่าเริ่มต้น page และ limit
+  const skip = (page - 1) * limit;
+
+  const [orders, totalOrders] = await Promise.all([
+    Order.find({ user: req.user._id })
+      .sort({ createdAt: -1 }) // เรียงลำดับจากใหม่ไปเก่า
+      .select("orderItems totalAmount createdAt") // เลือกเฉพาะฟิลด์ที่ต้องการ
+      .skip(skip) // ข้ามตามหน้าปัจจุบัน
+      .limit(Number(limit)), // กำหนดจำนวนเอกสารต่อหน้า
+    Order.countDocuments({ user: req.user._id }), // นับคำสั่งซื้อทั้งหมด
+  ]);
 
   res.status(200).json({
     success: true,
     orders,
+    totalOrders,
+    totalPages: Math.ceil(totalOrders / limit), // จำนวนหน้าทั้งหมด
+    page: Number(page), // หน้าปัจจุบัน
   });
 });
 
@@ -73,10 +85,21 @@ export const getOrderDetails = catchAsyncErrors(async (req, res, next) => {
 
 // Get all orders - ADMIN  =>  /api/admin/orders
 export const allOrders = catchAsyncErrors(async (req, res, next) => {
-  const orders = await Order.find();
+  const { page = 1, limit = 10 } = req.query; // กำหนดค่าเริ่มต้น page และ limit
+  const skip = (page - 1) * limit;
+
+  const orders = await Order.find()
+    .skip(skip) // ข้ามเอกสาร
+    .limit(limit); // จำกัดจำนวนเอกสารต่อหน้า
+
+  const totalOrders = await Order.countDocuments(); // นับจำนวนคำสั่งซื้อทั้งหมด
+
   res.status(200).json({
     success: true,
     orders,
+    totalOrders, // จำนวนคำสั่งซื้อทั้งหมด
+    page, // หน้าปัจจุบัน
+    totalPages: Math.ceil(totalOrders / limit), // จำนวนหน้าทั้งหมด
   });
 });
 
@@ -105,6 +128,14 @@ export const updateOrder = catchAsyncErrors(async (req, res, next) => {
     if (!product) {
       return next(new ErrorHandler("No Product found with this ID", 404));
     }
+
+    // ตรวจสอบว่าสต็อกเพียงพอหรือไม่
+    if (product.stock < item.quantity) {
+      return next(
+        new ErrorHandler(`Not enough stock for product: ${product.name}`, 400)
+      );
+    }
+
     product.stock = product.stock - item.quantity;
     await product.save({ validateBeforeSave: false });
   }
