@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 const ProductItem = ({ product }) => {
   const [selectedSize, setSelectedSize] = useState("small");
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const getPriceBySize = (size) => {
     const priceObject = product.prices.find((p) => p.size === size);
@@ -11,12 +12,21 @@ const ProductItem = ({ product }) => {
   };
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 w-full  overflow-hidden">
-      <div className="relative overflow-hidden h-[220px]">
+      <div
+        className="relative overflow-hidden h-[220px]"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
         <img
           className="object-cover w-full h-full"
           src={product.image}
           alt={product.name}
         />
+        {showTooltip && (
+          <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black text-white text-sm px-3 py-1 rounded-md">
+            {product.name}
+          </div>
+        )}
       </div>
       <div className="flex items-center justify-center mt-4">
         <StarRatings
