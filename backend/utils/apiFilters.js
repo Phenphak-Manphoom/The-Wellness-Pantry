@@ -17,16 +17,51 @@ class APIFilters {
   filter() {
     const queryCopy = { ...this.queryStr };
 
-    // Fields to remove from filtering
     ["keyword", "page"].forEach((field) => delete queryCopy[field]);
 
-    // Convert query for MongoDB operators,price,rating
-    const queryStr = JSON.stringify(queryCopy).replace(
-      /\b(gt|gte|lt|lte)\b/g,
-      (match) => `$${match}`
-    );
+    console.log("✅ Received query parameters:", this.queryStr);
 
-    this.query = this.query.find(JSON.parse(queryStr));
+    // กำหนดตัวแปรสำหรับ filter
+    const filterConditions = {};
+
+    // ✅ ใช้ Object.entries() เพื่อลดโค้ดซ้ำซ้อน
+    Object.entries(queryCopy).forEach(([key, value]) => {
+      if (value != null) {
+        console.log(`✅ Filtering by ${key}:`, value);
+      }
+    });
+
+    // ✅ กรองตาม size + price
+    const size = this.queryStr.size;
+    const min = Number(this.queryStr["prices.price"]?.gte);
+    const max = Number(this.queryStr["prices.price"]?.lte);
+
+    if (size && !isNaN(min) && !isNaN(max)) {
+      console.log(
+        `🛒 Filtering by size: ${size}, price >= ${min}, price <= ${max}`
+      );
+
+      filterConditions.prices = {
+        $elemMatch: {
+          size,
+          price: { $gte: min, $lte: max },
+        },
+      };
+    }
+
+    // ✅ กรองตาม category
+    if (this.queryStr.category) {
+      filterConditions.category = this.queryStr.category;
+    }
+
+    // ✅ กรองตาม rating
+    if (this.queryStr.ratings) {
+      filterConditions.ratings = { $gte: Number(this.queryStr.ratings) };
+    }
+
+    console.log("🔍 Final Filters:", JSON.stringify(filterConditions, null, 2));
+
+    this.query = this.query.find(filterConditions);
     return this;
   }
 
