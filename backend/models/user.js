@@ -40,7 +40,7 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   try {
-    const SALT_ROUNDS = process.env.SALT_ROUNDS || 10;
+    const SALT_ROUNDS =parseInt(process.env.SALT_ROUNDS, 10) || 10;
     this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
     next();
   } catch (error) {
