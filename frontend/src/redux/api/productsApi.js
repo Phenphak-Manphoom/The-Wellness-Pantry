@@ -3,6 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const productApi = createApi({
   reducerPath: "productApi",
   baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
+  tagTypes: ["Product"], // เพิ่ม tag เพื่อ cache และ invalidation
   endpoints: (builder) => ({
     getProducts: builder.query({
       query: (params) => {
@@ -12,27 +13,27 @@ export const productApi = createApi({
             Object.entries(obj).filter(([_, v]) => v != null && v !== "")
           );
 
-        const queryObj = cleanParams({
-          page: params?.page,
-          keyword: params?.keyword,
-          category: params?.category,
-          "prices.price[gte]": params?.min,
-          "prices.price[lte]": params?.max,
-          size: params?.size,
-          ratings: params?.ratings,
-        });
-
-        console.log("📤 Redux Toolkit Query sending params:", queryObj); // Debug
-
         return {
           url: "/products",
-          params: queryObj,
+          params: cleanParams({
+            page: params?.page,
+            keyword: params?.keyword,
+            category: params?.category,
+            "prices.price[gte]": params?.min,
+            "prices.price[lte]": params?.max,
+            size: params?.size,
+            ratings: params?.ratings,
+          }),
         };
       },
+      providesTags: (
+        result //providesTags ใช้ใน query เท่านั้น (ไม่ใช้ใน mutation)
+      ) => (result ? [{ type: "Product", id: "LIST" }] : []), // ใช้ cache
     }),
 
     getProductDetails: builder.query({
       query: (id) => `/products/${id}`,
+      providesTags: (result, error, id) => [{ type: "Product", id }],
     }),
   }),
 });
