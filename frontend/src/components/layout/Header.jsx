@@ -93,25 +93,31 @@ const Header = () => {
               <Link
                 to="/admin/dashboard"
                 className="block px-4 py-2 text-white hover:bg-[#527210]"
+                onClick={() => setIsDropdownOpen(false)}
               >
                 Dashboard
               </Link>
               <Link
                 to="/me/orders"
                 className="block px-4 py-2 text-white hover:bg-[#527210]"
+                onClick={() => setIsDropdownOpen(false)}
               >
                 Orders
               </Link>
               <Link
                 to="/me/profile"
                 className="block px-4 py-2 text-white hover:bg-[#527210]"
+                onClick={() => setIsDropdownOpen(false)}
               >
                 Profile
               </Link>
               <Link
                 to="/"
                 className="block px-4 py-2 text-red-500 hover:bg-gray-100"
-                onClick={logoutHandler}
+                onClick={() => {
+                  logoutHandler();
+                  setIsDropdownOpen(false);
+                }}
               >
                 Logout
               </Link>
