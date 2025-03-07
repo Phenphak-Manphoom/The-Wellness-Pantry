@@ -60,7 +60,10 @@ export const logout = catchAsyncErrors(async (req, res, next) => {
 
 // Upload user avatar   =>  /api/v1/me/upload_avatar
 export const uploadAvatar = catchAsyncErrors(async (req, res, next) => {
-  const avatarResponse = await upload_file(req.body.avatar, "the-wellness-pantry/avatars");
+  const avatarResponse = await upload_file(
+    req.body.avatar,
+    "the-wellness-pantry/avatars"
+  );
 
   // Remove previous avatar
   if (req?.user?.avatar?.url) {
@@ -95,7 +98,7 @@ export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
     await user.save({ validateBeforeSave: false }); // Save token and expiration
 
     // Create reset password url
-    const resetUrl = `${process.env.FRONTEND_URL}/api/password/reset/${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
 
     const message = getResetPasswordTemplate(user?.name, resetUrl);
 
