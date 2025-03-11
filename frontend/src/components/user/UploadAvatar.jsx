@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useUploadAvatarMutation } from "../../redux/api/userApi";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
+import MetaData from "../layout/MetaData";
 
 const UploadAvatar = () => {
   const { user } = useSelector((state) => state.auth);
@@ -54,6 +55,7 @@ const UploadAvatar = () => {
 
   return (
     <UserLayout>
+      <MetaData title={"Upload Avatar"} />
       <div className="flex justify-center mt-8">
         <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
           <h2 className="text-xl font-semibold text-center mb-6">
