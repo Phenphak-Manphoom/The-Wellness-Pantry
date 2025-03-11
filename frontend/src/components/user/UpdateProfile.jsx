@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
 import { useUpdateProfileMutation } from "../../redux/api/userApi";
 import UserLayout from "../layout/UserLayout";
+import MetaData from "../layout/MetaData";
 
 const UpdateProfile = () => {
   const [name, setName] = useState("");
@@ -51,6 +52,7 @@ const UpdateProfile = () => {
 
   return (
     <UserLayout>
+      <MetaData title={"Update Profile"} />
       <div className="flex justify-center mt-8">
         <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
           <h2 className="text-xl font-semibold text-center mb-6">
