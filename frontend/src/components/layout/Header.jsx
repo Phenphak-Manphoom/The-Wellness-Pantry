@@ -11,6 +11,8 @@ const Header = () => {
   const [logout] = useLogoutMutation();
 
   const { user } = useSelector((state) => state.auth);
+  const { cartItems } = useSelector((state) => state.cart);
+
   const { isLoading } = useGetMeQuery(undefined, { skip: !!user });
 
   const toggleDropdown = () => {
@@ -49,7 +51,7 @@ const Header = () => {
           Cart
           <span className="sr-only">Notifications</span>
           <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-[#f1c60b] border-2 border-white rounded-full -top-2 -end-2">
-            20
+           {cartItems.length}
           </div>
         </a>
 
