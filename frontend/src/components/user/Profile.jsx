@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import UserLayout from "../layout/UserLayout";
 import { useSelector } from "react-redux";
+import MetaData from "../layout/MetaData";
 
 const Profile = () => {
   const { user } = useSelector((state) => state.auth);
@@ -16,6 +17,7 @@ const Profile = () => {
 
   return (
     <UserLayout>
+      <MetaData title={"Your Profile"} />
       <div className="flex flex-col md:flex-row justify-evenly mt-5 items-center user-info">
         <div className="w-full md:w-1/3 flex justify-center">
           <figure className="w-full h-full md:w-56 md:h-56">
