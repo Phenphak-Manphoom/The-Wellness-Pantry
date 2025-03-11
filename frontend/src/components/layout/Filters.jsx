@@ -1,161 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// import { useNavigate, useSearchParams } from "react-router-dom";
-// import StarRatings from "react-star-ratings";
-// import { getPriceQueryParams } from "../../helpers/helpers";
-// import { PRODUCT_CATEGORIES } from "../../constants/constants";
-
-// const Filters = () => {
-//   const [min, setMin] = useState(0);
-//   const [max, setMax] = useState(0);
-//   const [selectedSize, setSelectedSize] = useState(""); // ✅ เพิ่ม state สำหรับ size
-
-//   const navigate = useNavigate();
-//   let [searchParams] = useSearchParams();
-
-//   const SIZES = ["small", "medium", "large"]; // ✅ เพิ่ม Size
-
-//   useEffect(() => {
-//     if (searchParams.has("size")) {
-//       setSelectedSize(searchParams.get("size"));
-//       console.log("✅ Found size in URL:", searchParams.get("size")); // ✅ Debug
-//     }
-//   }, [searchParams]);
-
-//   useEffect(() => {
-//     console.log("🎯 selectedSize updated:", selectedSize); // ✅ Debug
-//   }, [selectedSize]);
-
-//   const handleClick = (checkbox) => {
-//     const checkboxes = document.getElementsByName(checkbox.name);
-//     checkboxes.forEach((item) => {
-//       if (item !== checkbox) item.checked = false;
-//     });
-//     if (checkbox.checked === false) {
-//       searchParams.delete(checkbox.name);
-//     } else {
-//       searchParams.set(checkbox.name, checkbox.value);
-//     }
-//     navigate("?" + searchParams.toString());
-//   };
-
-//   const handleButtonClick = (e) => {
-//     e.preventDefault();
-//     let newSearchParams = new URLSearchParams(searchParams);
-
-//     newSearchParams = getPriceQueryParams(newSearchParams, "min", min);
-//     newSearchParams = getPriceQueryParams(newSearchParams, "max", max);
-//     if (selectedSize) {
-//       newSearchParams.set("size", selectedSize); // ✅ เพิ่ม size ลงใน URL
-//     } else {
-//       newSearchParams.delete("size"); // ✅ ลบ size ออกหากไม่ได้เลือก
-//     }
-
-//     console.log(
-//       "✅ Final params before sending to API:",
-//       newSearchParams.toString()
-//     ); // ✅ Debug จุดนี้
-//     navigate("?" + newSearchParams.toString());
-//   };
-
-//   const defaultCheckHandler = (checkboxType, checkboxValue) => {
-//     return searchParams.get(checkboxType) === checkboxValue;
-//   };
-
-//   return (
-//     <div className="border p-4 rounded-lg shadow-md">
-//       <h3 className="text-lg font-semibold mb-2">Filters</h3>
-//       <hr className="mb-4" />
-
-//       {/* 🔹 ฟิลเตอร์ขนาด (Size) */}
-//       <h5 className="text-md font-medium mb-3">Size</h5>
-//       <div className="flex gap-2 mb-4">
-//         {SIZES.map((size, index) => (
-//           <div key={index} className="flex items-center mb-2">
-//             <input
-//               type="radio"
-//               name="size"
-//               value={size}
-//               checked={selectedSize === size}
-//               onChange={(e) => {
-//                 console.log("📌 Size selected:", e.target.value); // ✅ Debug
-//                 setSelectedSize(e.target.value);
-//               }}
-//               className="mr-2"
-//             />
-//             <label>{size}</label>
-//           </div>
-//         ))}
-//       </div>
-
-//       {/* 🔹 ฟิลเตอร์ราคา */}
-//       <h5 className="text-md font-medium mb-3">Price</h5>
-//       <form className="flex gap-2" onSubmit={handleButtonClick}>
-//         <input
-//           type="text"
-//           className="border p-2 rounded w-1/3"
-//           placeholder="Min ($)"
-//           value={min}
-//           onChange={(e) => setMin(e.target.value)}
-//         />
-//         <input
-//           type="text"
-//           className="border p-2 rounded w-1/3"
-//           placeholder="Max ($)"
-//           value={max}
-//           onChange={(e) => setMax(e.target.value)}
-//         />
-//         <button
-//           type="submit"
-//           className="bg-blue-500 text-white px-4 py-2 rounded"
-//         >
-//           GO
-//         </button>
-//       </form>
-
-//       <hr className="my-4" />
-//       <h5 className="text-md font-medium mb-3">Category</h5>
-//       {PRODUCT_CATEGORIES.map((category, index) => (
-//         <div key={index} className="flex items-center mb-2">
-//           <input
-//             type="checkbox"
-//             name="category"
-//             value={category}
-//             defaultChecked={defaultCheckHandler("category", category)}
-//             onClick={(e) => handleClick(e.target)}
-//             className="mr-2"
-//           />
-//           <label>{category}</label>
-//         </div>
-//       ))}
-
-//       <hr className="my-4" />
-//       <h5 className="text-md font-medium mb-3">Ratings</h5>
-//       {[5, 4, 3, 2, 1].map((rating) => (
-//         <div key={rating} className="flex items-center mb-2">
-//           <input
-//             type="checkbox"
-//             name="ratings"
-//             value={rating}
-//             defaultChecked={defaultCheckHandler("ratings", rating.toString())}
-//             onClick={(e) => handleClick(e.target)}
-//             className="mr-2"
-//           />
-//           <StarRatings
-//             rating={rating}
-//             starRatedColor="#ffb829"
-//             numberOfStars={5}
-//             name="rating"
-//             starDimension="21px"
-//             starSpacing="1px"
-//           />
-//         </div>
-//       ))}
-//     </div>
-//   );
-// };
-
-// export default Filters;
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import StarRatings from "react-star-ratings";
@@ -203,21 +45,21 @@ const Filters = () => {
     const updatedRatings = selectedRatings.includes(rating)
       ? selectedRatings.filter((item) => item !== rating)
       : [...selectedRatings, rating];
-  
+
     // ถ้าเลือก 4 ดาวหรือมากกว่า จะทำการลบ rating ที่ต่ำกว่าออก
-    const ratingsToKeep = updatedRatings.filter((r) => parseInt(r) >= parseInt(rating));
-  
+    const ratingsToKeep = updatedRatings.filter(
+      (r) => parseInt(r) >= parseInt(rating)
+    );
+
     // ตั้งค่าใหม่ให้กับ selectedRatings
     setSelectedRatings(ratingsToKeep);
-  
+
     // ใช้ URLSearchParams เพื่ออัพเดต query string
     let newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.delete("ratings"); // ลบค่า ratings เดิม
     ratingsToKeep.forEach((rating) => newSearchParams.set("ratings", rating)); // ใช้ set แทน append เพื่อแทนที่ค่าด้วยค่าใหม่
     navigate("?" + newSearchParams.toString()); // นำทางไปยัง URL ใหม่
   };
-  
-  
 
   const handlePriceChange = (e) => {
     const value = e.target.value;
