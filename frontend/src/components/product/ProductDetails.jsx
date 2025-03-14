@@ -41,14 +41,18 @@ const ProductDetails = () => {
   };
 
   const setItemToCart = () => {
+    const priceObject = product?.prices?.find((p) => p.size === selectedSize);
+
     const cartItem = {
       product: product._id,
       name: product.name,
       image: product.image,
-      price: product.prices[0].price,
+      size: selectedSize, // ✅ ส่งขนาดที่เลือกไป
+      price: priceObject ? priceObject.price : product.prices[0].price, // ✅ ใช้ราคาตามขนาดที่เลือก
       stock: product.stock,
       quantity,
     };
+
     dispatch(setCartItem(cartItem));
     toast.success("Item added to Cart");
   };
