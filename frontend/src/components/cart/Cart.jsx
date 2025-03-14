@@ -29,6 +29,7 @@ const Cart = () => {
       price: item?.price,
       image: item?.image,
       stock: item?.stock,
+      size: item?.size, // ✅ เพิ่มขนาดสินค้า
       quantity: newQty,
     };
 
@@ -145,10 +146,13 @@ const Cart = () => {
 
                             <div className="w-full min-w-0 flex-1 space-y-4 md:order-2 md:max-w-md">
                               <Link
-                                to={`/products/{item?.product} THB`}
+                                to={`/products/${item?.product} THB`}
                                 className="text-base font-medium text-gray-900 hover:underline dark:text-white"
                               >
                                 {item?.name}{" "}
+                                <span className="text-sm font-semibold text-indigo-600">
+                                  ({item?.size})
+                                </span>
                               </Link>
 
                               <div className="flex items-center gap-4">
