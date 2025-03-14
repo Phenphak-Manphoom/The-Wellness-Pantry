@@ -15,6 +15,9 @@ import UpdatePassword from "./components/user/UpdatePassword";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
 import Cart from "./components/cart/Cart";
+import Shipping from "./components/cart/Shipping";
+import ConfirmOrder from "./components/cart/ConfirmOrder";
+import PaymentMethod from "./components/cart/PaymentMethod";
 
 function App() {
   return (
@@ -68,6 +71,30 @@ function App() {
           />
 
           <Route path="/cart" element={<Cart />} />
+          <Route
+            path="/shipping"
+            element={
+              <ProtectRoute>
+                <Shipping />
+              </ProtectRoute>
+            }
+          />
+          <Route
+            path="/confirm_order"
+            element={
+              <ProtectRoute>
+                <ConfirmOrder />
+              </ProtectRoute>
+            }
+          />
+          <Route
+            path="/payment_method"
+            element={
+              <ProtectRoute>
+                <PaymentMethod />
+              </ProtectRoute>
+            }
+          />
         </Routes>
 
         <Footer />
