@@ -13,17 +13,27 @@ export const getPriceQueryParams = (searchParams, key, value) => {
 };
 
 export const calculateOrderCost = (cartItems) => {
+  // คำนวณราคาสินค้า
   const itemsPrice = cartItems?.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
   );
 
+  // คำนวณค่าจัดส่ง
   const shippingPrice = itemsPrice > 200 ? 0 : 25;
-  const taxPrice = Number((0.15 * itemsPrice).toFixed(2));
-  const totalPrice = (itemsPrice + shippingPrice + taxPrice).toFixed(2);
+
+  // คำนวณภาษี
+  const taxPrice = (itemsPrice * 0.07).toFixed(2);
+
+  // คำนวณราคาสุทธิ
+  const totalPrice = (
+    parseFloat(itemsPrice) +
+    parseFloat(shippingPrice) +
+    parseFloat(taxPrice)
+  ).toFixed(2);
 
   return {
-    itemsPrice: Number(itemsPrice).toFixed(2),
+    itemsPrice: parseFloat(itemsPrice).toFixed(2),
     shippingPrice,
     taxPrice,
     totalPrice,
