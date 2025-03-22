@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import productRoutes from "./routes/productRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 import { connectDatabase, disconnectDatabase } from "./config/dbConnect.js";
 import errorMiddleware from "./middlewares/errors.js";
 
@@ -12,11 +13,20 @@ dotenv.config({ path: "backend/config/config.env" });
 const app = express();
 
 // Middleware
-app.use(express.json({limit: "10mb"}));
+app.use(
+  express.json({
+    limit: "10mb",
+    verify: (req, res, buf) => {
+      req.rawBody = buf.toString();
+    },
+  })
+);
 app.use(cookieParser());
+
 app.use("/api", productRoutes);
 app.use("/api", authRoutes);
 app.use("/api", orderRoutes);
+app.use("/api", paymentRoutes);
 
 // Error handling middleware
 app.use(errorMiddleware);
