@@ -45,7 +45,11 @@ const Shipping = () => {
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
             Shipping Info
           </h2>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-4 text-left"
+          >
+            {/* Address */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Address
@@ -60,6 +64,7 @@ const Shipping = () => {
               )}
             </div>
 
+            {/* City */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 City
@@ -74,6 +79,7 @@ const Shipping = () => {
               )}
             </div>
 
+            {/* Phone No */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Phone No
@@ -90,6 +96,7 @@ const Shipping = () => {
               )}
             </div>
 
+            {/* Zip Code */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Zip Code
@@ -104,6 +111,7 @@ const Shipping = () => {
               )}
             </div>
 
+            {/* Country */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Country
