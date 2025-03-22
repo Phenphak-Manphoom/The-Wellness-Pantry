@@ -3,49 +3,80 @@ import MetaData from "../layout/MetaData";
 import { useSelector } from "react-redux";
 import CheckoutSteps from "./CheckoutSteps";
 import { calculateOrderCost } from "../../helpers/helpers";
-import { useCreateNewOrderMutation } from "../../redux/api/orderApi";
+import {
+  useCreateNewOrderMutation,
+  useStripeCheckoutSessionMutation,
+} from "../../redux/api/orderApi.js";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const PaymentMethod = () => {
   const [method, setMethod] = useState("");
-
   const navigate = useNavigate();
   const { shippingInfo, cartItems } = useSelector((state) => state.cart);
-  const [createNewOrder, { isLoading, error, isSuccess }] =
-    useCreateNewOrderMutation();
+
+  const [createNewOrder, { error, isSuccess }] = useCreateNewOrderMutation();
+  const [
+    stripeCheckoutSession,
+    { data: checkoutData, error: checkoutError, isLoading },
+  ] = useStripeCheckoutSessionMutation();
+
+  useEffect(() => {
+    if (checkoutData) {
+      window.location.href = checkoutData?.url;
+    }
+
+    if (checkoutError) {
+      toast.error(checkoutError?.data?.message || "Payment failed.");
+    }
+  }, [checkoutData, checkoutError]);
 
   useEffect(() => {
     if (error) {
-      toast.error(error?.data?.message);
+      toast.error(error?.data?.message || "Order creation failed.");
     }
+
     if (isSuccess) {
       navigate("/");
     }
-  }, [error, isSuccess]);
+  }, [error, isSuccess, navigate]);
+
+  const handlePaymentMethodChange = (method) => {
+    setMethod(method);
+  };
+
+  const createOrder = (paymentMethod) => {
+    const { itemsPrice, shippingPrice, taxPrice, totalPrice } =
+      calculateOrderCost(cartItems);
+    const orderData = {
+      shippingInfo,
+      orderItems: cartItems,
+      itemsPrice,
+      shippingAmount: shippingPrice,
+      taxAmount: taxPrice,
+      totalAmount: totalPrice,
+    };
+
+    if (paymentMethod === "COD") {
+      createNewOrder({
+        ...orderData,
+        paymentMethod: "COD",
+        paymentInfo: { status: "Not Paid" },
+      });
+    } else if (paymentMethod === "Card") {
+      stripeCheckoutSession(orderData);
+    }
+  };
 
   const submitHandler = (e) => {
     e.preventDefault();
-    const { itemsPrice, shippingPrice, taxPrice, totalPrice } =
-      calculateOrderCost(cartItems);
 
-    if (method === "COD") {
-      const orderData = {
-        shippingInfo,
-        orderItems: cartItems,
-        itemsPrice,
-        shippingAmount: shippingPrice,
-        taxAmount: taxPrice,
-        totalAmount: totalPrice,
-        paymentInfo: { status: "Not Paid" },
-        paymentMethod: "COD",
-      };
-      createNewOrder(orderData);
+    if (!method) {
+      toast.error("Please select a payment method.");
+      return;
     }
 
-    if (method === "Card") {
-      alert("Card");
-    }
+    createOrder(method);
   };
 
   return (
@@ -61,34 +92,33 @@ const PaymentMethod = () => {
             </h2>
 
             <div className="space-y-3">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="payment_mode"
-                  value="COD"
-                  className="w-4 h-4 accent-blue-600"
-                  onChange={(e) => setMethod("COD")}
-                />
-                <span>Cash on Delivery</span>
-              </label>
-
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="payment_mode"
-                  value="Card"
-                  className="w-4 h-4 accent-blue-600"
-                  onChange={(e) => setMethod("Card")}
-                />
-                <span>Card - VISA, MasterCard</span>
-              </label>
+              {["COD", "Card"].map((payMethod) => (
+                <label
+                  key={payMethod}
+                  className="flex items-center space-x-2 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="payment_mode"
+                    value={payMethod}
+                    className="w-4 h-4 accent-blue-600"
+                    onChange={() => handlePaymentMethodChange(payMethod)}
+                  />
+                  <span>
+                    {payMethod === "COD"
+                      ? "Cash on Delivery"
+                      : "Card - VISA, MasterCard"}
+                  </span>
+                </label>
+              ))}
             </div>
 
             <button
               type="submit"
               className="mt-6 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+              disabled={isLoading || !method}
             >
-              CONTINUE
+              {isLoading ? "Processing..." : "CONTINUE"}
             </button>
           </form>
         </div>
