@@ -50,10 +50,12 @@ export const myOrders = catchAsyncErrors(async (req, res, next) => {
   const { page = 1, limit = 10 } = req.query; // กำหนดค่าเริ่มต้น page และ limit
   const skip = (page - 1) * limit;
 
-  const [orders, totalOrders] = await Promise.all([
+  const [orders, totalOrders] = await Promise.all([ 
     Order.find({ user: req.user._id })
       .sort({ createdAt: -1 }) // เรียงลำดับจากใหม่ไปเก่า
-      .select("orderItems totalAmount createdAt") // เลือกเฉพาะฟิลด์ที่ต้องการ
+      .select(
+        "shippingInfo paymentInfo  user orderItems paymentMethod  itemsPrice taxAmount  shippingAmount totalAmount orderStatus createdAt updatedAt"
+      ) // เลือกเฉพาะฟิลด์ที่ต้องการ
       .skip(skip) // ข้ามตามหน้าปัจจุบัน
       .limit(Number(limit)), // กำหนดจำนวนเอกสารต่อหน้า
     Order.countDocuments({ user: req.user._id }), // นับคำสั่งซื้อทั้งหมด
