@@ -34,7 +34,7 @@ const Header = () => {
       <div className="w-full md:w-1/4 flex justify-start md:pl-5 mb-4 md:mb-0">
         <Link to="/">
           <img
-            src="../images/logo5.png"
+            src="/images/logo5.png"
             alt="The Wellness Pantry Logo"
             className="h-16 w-auto object-contain"
           />
@@ -63,11 +63,7 @@ const Header = () => {
               onClick={toggleDropdown}
             >
               <img
-                src={
-                  user?.avatar
-                    ? user?.avatar?.url
-                    : "../images/default_avatar.jpg"
-                }
+                src={user?.avatar?.url || "/images/default_avatar.jpg"}
                 alt="User Avatar"
                 className="w-8 h-8 rounded-full mr-2"
               />
