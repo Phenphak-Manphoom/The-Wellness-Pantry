@@ -6,7 +6,7 @@ const CustomPagination = ({ resPerPage, filteredProductsCount }) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const page = Number(searchParams.get("page")) || 1;
-  const pageCount = Math.ceil(filteredProductsCount / resPerPage);
+  const pageCount = Math.max(1, Math.ceil(filteredProductsCount / resPerPage));
 
   const handlePageClick = ({ selected }) => {
     const newPage = selected + 1; // ReactPaginate นับหน้าเริ่มจาก 0
@@ -26,7 +26,7 @@ const CustomPagination = ({ resPerPage, filteredProductsCount }) => {
           pageRangeDisplayed={3}
           marginPagesDisplayed={1}
           onPageChange={handlePageClick}
-          forcePage={page - 1} // ReactPaginate ใช้ index-based
+          forcePage={page > 0 ? page - 1 : 0}
           containerClassName="flex space-x-2"
           pageLinkClassName="px-4 py-2 border rounded-full text-gray-700 hover:bg-orange-300 hover:text-black"
           activeLinkClassName="bg-orange-500 text-white"
