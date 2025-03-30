@@ -4,9 +4,11 @@ import { useGetProductDetailsQuery } from "../../redux/api/productsApi";
 import toast from "react-hot-toast";
 import Loader from "../layout/Loader";
 import StarRatings from "react-star-ratings";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setCartItem } from "../../redux/features/cartSlice";
 import MetaData from "../layout/MetaData";
+import NewReview from "../reviews/NewReview";
+import ListReviews from "../reviews/ListReviews";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -14,6 +16,8 @@ const ProductDetails = () => {
 
   const { data, isLoading, error, isError } = useGetProductDetailsQuery(id);
   const product = data?.product;
+
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   // ตั้งค่าขนาดเริ่มต้นเป็นตัวแรกของราคา หรือ fallback เป็น "small"
   const [selectedSize, setSelectedSize] = useState(
@@ -187,16 +191,23 @@ const ProductDetails = () => {
               </div>
 
               {/* แจ้งเตือนให้ล็อกอิน */}
-              <div
-                className="border border-red-100 rounded-lg my-5 p-2 text-lg bg-red-200 cursor-pointer"
-                type="alert"
-              >
-                Login to post your review.
-              </div>
+              {isAuthenticated ? (
+                <NewReview productId={product?._id} />
+              ) : (
+                <div
+                  className="border border-red-100 rounded-lg my-5 p-2 text-lg bg-red-200 cursor-pointer"
+                  type="alert"
+                >
+                  Login to post your review.
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+      {product?.reviews?.length > 0 && (
+        <ListReviews reviews={product?.reviews} />
+      )}
     </>
   );
 };
