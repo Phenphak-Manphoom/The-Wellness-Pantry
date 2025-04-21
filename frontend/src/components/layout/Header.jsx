@@ -51,7 +51,7 @@ const Header = () => {
           Cart
           <span className="sr-only">Notifications</span>
           <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-[#f1c60b] border-2 border-white rounded-full -top-2 -end-2">
-           {cartItems.length}
+            {cartItems.length}
           </div>
         </a>
 
@@ -88,13 +88,15 @@ const Header = () => {
                 isDropdownOpen ? "opacity-100 visible" : "opacity-0 invisible"
               }`}
             >
-              <Link
-                to="/admin/dashboard"
-                className="block px-4 py-2 text-white hover:bg-[#527210]"
-                onClick={() => setIsDropdownOpen(false)}
-              >
-                Dashboard
-              </Link>
+              {user?.role === "admin" && (
+                <Link
+                  to="/admin/dashboard"
+                  className="block px-4 py-2 text-white hover:bg-[#527210]"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              )}
               <Link
                 to="/me/orders"
                 className="block px-4 py-2 text-white hover:bg-[#527210]"
