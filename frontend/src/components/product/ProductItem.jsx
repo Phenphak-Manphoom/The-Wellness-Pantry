@@ -15,6 +15,10 @@ const ProductItem = ({ product }) => {
     return priceObject ? priceObject.price : "N/A";
   };
 
+  // ดึง URL รูปภาพจาก product.images ถ้ามีหลายภาพ
+  const imageUrls = product?.images?.map((image) => image.url) || [];
+  const defaultImage = imageUrls[0] || "/default.jpg"; // fallback สำหรับกรณีไม่มีรูป
+
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 w-full overflow-hidden">
       <div
@@ -24,7 +28,7 @@ const ProductItem = ({ product }) => {
       >
         <img
           className="object-cover w-full h-full"
-          src={product.image}
+          src={defaultImage}
           alt={product.name}
         />
         {showTooltip && (
