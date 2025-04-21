@@ -17,6 +17,7 @@ import ConfirmOrder from "../cart/ConfirmOrder";
 import PaymentMethod from "../cart/PaymentMethod";
 import MyOrders from "../order/MyOrders";
 import OrderDetails from "../order/OrderDetails";
+import Invoice from "../invoice/Invoice";
 
 const userRoutes = () => {
   return (
@@ -104,6 +105,15 @@ const userRoutes = () => {
         element={
           <ProtectRoute>
             <OrderDetails />
+          </ProtectRoute>
+        }
+      />
+
+      <Route
+        path="/invoice/order/:id"
+        element={
+          <ProtectRoute>
+            <Invoice />
           </ProtectRoute>
         }
       />
