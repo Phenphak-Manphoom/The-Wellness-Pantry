@@ -2,12 +2,15 @@ import express from "express";
 import {
   canUserReview,
   deleteProduct,
+  deleteProductImage,
   deleteReview,
+  getAdminProducts,
   getProduct,
   getProductDetails,
   getProductReviews,
   newProduct,
   updateProduct,
+  uploadProductImages,
 } from "../controllers/productController.js";
 import { authorizeRoles, isAuthenticatedUser } from "../middlewares/auth.js";
 import { createProductReview } from "../controllers/productController.js";
@@ -17,9 +20,18 @@ const router = express.Router();
 router.route("/products").get(getProduct);
 router
   .route("/admin/products")
-  .post(isAuthenticatedUser, authorizeRoles("admin"), newProduct);
+  .post(isAuthenticatedUser, authorizeRoles("admin"), newProduct)
+  .get(isAuthenticatedUser, authorizeRoles("admin"), getAdminProducts);
 
 router.route("/products/:id").get(getProductDetails);
+
+router
+  .route("/admin/products/:id/upload_images")
+  .put(isAuthenticatedUser, authorizeRoles("admin"), uploadProductImages);
+
+router
+  .route("/admin/products/:id/delete_image")
+  .put(isAuthenticatedUser, authorizeRoles("admin"), deleteProductImage);
 
 router
   .route("/admin/products/:id")
