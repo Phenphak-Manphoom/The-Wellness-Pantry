@@ -27,7 +27,7 @@ const CustomPagination = ({ resPerPage, filteredProductsCount }) => {
           marginPagesDisplayed={1}
           onPageChange={handlePageClick}
           forcePage={page > 0 ? page - 1 : 0}
-          containerClassName="flex space-x-2"
+          containerClassName="flex space-x-2 mb-10"
           pageLinkClassName="px-4 py-2 border rounded-full text-gray-700 hover:bg-orange-300 hover:text-black"
           activeLinkClassName="bg-orange-500 text-white"
           previousLabel="Prev"
