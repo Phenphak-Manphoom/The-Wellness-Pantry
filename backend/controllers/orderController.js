@@ -50,7 +50,7 @@ export const myOrders = catchAsyncErrors(async (req, res, next) => {
   const { page = 1, limit = 10 } = req.query; // กำหนดค่าเริ่มต้น page และ limit
   const skip = (page - 1) * limit;
 
-  const [orders, totalOrders] = await Promise.all([ 
+  const [orders, totalOrders] = await Promise.all([
     Order.find({ user: req.user._id })
       .sort({ createdAt: -1 }) // เรียงลำดับจากใหม่ไปเก่า
       .select(
@@ -165,5 +165,82 @@ export const deleteOrder = catchAsyncErrors(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Order deleted successfully",
+  });
+});
+
+// Utils: สร้างช่วงวันที่แบบรวม
+function getDateRange(startDate, endDate) {
+  const dates = [];
+  const current = new Date(startDate);
+
+  while (current <= endDate) {
+    dates.push(current.toISOString().split("T")[0]);
+    current.setDate(current.getDate() + 1);
+  }
+
+  return dates;
+}
+
+// Logic หลัก
+async function getSalesData(startDate, endDate) {
+  const results = await Order.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: startDate,
+          $lte: endDate,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+        },
+        totalSales: { $sum: "$totalAmount" },
+        numOrders: { $sum: 1 },
+      },
+    },
+  ]);
+
+  // สร้าง Map เพื่อ lookup เร็ว
+  const summaryMap = Object.fromEntries(
+    results.map(({ _id, totalSales, numOrders }) => [
+      _id.date,
+      { sales: totalSales, numOrders },
+    ])
+  );
+
+  let totalSales = 0;
+  let totalNumOrders = 0;
+
+  // เตรียม array ตามวันที่
+  const salesData = getDateRange(startDate, endDate).map((date) => {
+    const { sales = 0, numOrders = 0 } = summaryMap[date] || {};
+    totalSales += sales;
+    totalNumOrders += numOrders;
+    return { date, sales, numOrders };
+  });
+
+  return { salesData, totalSales, totalNumOrders };
+}
+
+// API Handler
+export const getSales = catchAsyncErrors(async (req, res, next) => {
+  const start = new Date(req.query.startDate);
+  const end = new Date(req.query.endDate);
+
+  start.setUTCHours(0, 0, 0, 0);
+  end.setUTCHours(23, 59, 59, 999);
+
+  const { salesData, totalSales, totalNumOrders } = await getSalesData(
+    start,
+    end
+  );
+
+  res.status(200).json({
+    totalSales,
+    totalNumOrders,
+    sales: salesData,
   });
 });
