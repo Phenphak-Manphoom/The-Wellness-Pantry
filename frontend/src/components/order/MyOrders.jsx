@@ -33,8 +33,7 @@ const MyOrders = () => {
 
   // Debounced search term update to avoid unnecessary re-renders
   const debouncedSearchTerm = useMemo(
-    () =>
-      debounce((term) => setSearchTerm(term), 500),
+    () => debounce((term) => setSearchTerm(term), 500),
     []
   );
 
