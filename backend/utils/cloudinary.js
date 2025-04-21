@@ -11,24 +11,36 @@ cloudinary.config({
 
 export const upload_file = (file, folder) => {
   return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload(
+    cloudinary.v2.uploader.upload(
       file,
-      (result) => {
+      {
+        resource_type: "auto", // รองรับ image, video, pdf ฯลฯ
+        folder,
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        if (!result?.public_id || !result?.secure_url) {
+          return reject(new Error("Upload failed: Incomplete result"));
+        }
+
         resolve({
           public_id: result.public_id,
-          url: result.url,
+          url: result.secure_url,
         });
-      },
-      {
-        resource_type: "auto",
-        folder,
       }
     );
   });
 };
 
-export const delete_file = async (file) => {
-  const res = await cloudinary.uploader.destroy(file);
+export const delete_file = async (public_id, resource_type = "image") => {
+  try {
+    const res = await cloudinary.v2.uploader.destroy(public_id, {
+      resource_type,
+    });
 
-  if (res?.result === "ok") return true;
+    return res?.result === "ok";
+  } catch (error) {
+    console.error("Failed to delete file from Cloudinary:", error);
+    return false;
+  }
 };
