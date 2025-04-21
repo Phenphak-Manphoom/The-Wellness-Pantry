@@ -19,17 +19,24 @@ const ProductDetails = () => {
 
   const { isAuthenticated } = useSelector((state) => state.auth);
 
-  // ตั้งค่าขนาดเริ่มต้นเป็นตัวแรกของราคา หรือ fallback เป็น "small"
   const [selectedSize, setSelectedSize] = useState(
     product?.prices[0]?.size ?? "small"
   );
   const [quantity, setQuantity] = useState(1);
+  const [mainImage, setMainImage] = useState(product?.images[0]?.url);
 
   useEffect(() => {
     if (isError) {
       toast.error(error?.data?.message || "Error fetching product details");
     }
   }, [isError, error]);
+
+  useEffect(() => {
+    // ตั้ง mainImage ใหม่เมื่อ product โหลดเสร็จ
+    if (product?.images?.length) {
+      setMainImage(product.images[0].url);
+    }
+  }, [product]);
 
   const getTotalPrice = () => {
     const priceObject = product?.prices?.find((p) => p.size === selectedSize);
@@ -46,13 +53,12 @@ const ProductDetails = () => {
 
   const setItemToCart = () => {
     const priceObject = product?.prices?.find((p) => p.size === selectedSize);
-
     const cartItem = {
       product: product._id,
       name: product.name,
       image: product.image,
-      size: selectedSize, // ✅ ส่งขนาดที่เลือกไป
-      price: priceObject ? priceObject.price : product.prices[0].price, // ✅ ใช้ราคาตามขนาดที่เลือก
+      size: selectedSize,
+      price: priceObject ? priceObject.price : product.prices[0].price,
       stock: product.stock,
       quantity,
     };
@@ -68,19 +74,33 @@ const ProductDetails = () => {
       <MetaData title={product?.name} />
       <div className="bg-gray-100">
         <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-wrap -mx-4">
-            {/* รูปสินค้า */}
-            <div className="w-full md:w-1/2 px-4 mb-8">
-              <img
-                src={product?.image}
-                alt={product?.name}
-                className="w-full h-auto rounded-lg shadow-md mb-4"
-                id="mainImage"
-              />
+          <div className="flex flex-col md:flex-row items-stretch gap-8">
+            {/* ฝั่งรูปสินค้า */}
+            <div className="w-full md:w-1/2 flex flex-col justify-between">
+              <div className="w-full h-[600px]">
+                <img
+                  src={mainImage}
+                  alt={product?.name}
+                  className="w-full h-full object-cover rounded-lg shadow-md mb-4"
+                />
+              </div>
+
+              {/* รูปภาพย่อย */}
+              <div className="flex space-x-4 overflow-x-auto mt-6">
+                {product?.images?.map((image) => (
+                  <img
+                    key={image.public_id}
+                    src={image.url}
+                    alt={product?.name}
+                    className="w-20 h-20 object-cover rounded-md cursor-pointer border-2 hover:border-gray-600"
+                    onClick={() => setMainImage(image.url)}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* รายละเอียดสินค้า */}
-            <div className="w-full md:w-1/2 px-4 text-left">
+            <div className="w-full md:w-1/2 text-left">
               <h2 className="text-3xl font-bold mb-2">{product?.name}</h2>
               <p className="text-gray-600 mb-4">Product # {product?._id}</p>
 
@@ -97,9 +117,10 @@ const ProductDetails = () => {
                   ({product?.numOfReviews ?? 0} Reviews)
                 </span>
               </div>
+
               <p className="text-gray-700 mb-6">{product?.description}</p>
 
-              {/* เลือกขนาดสินค้า */}
+              {/* เลือกขนาด */}
               <div className="mb-6">
                 <h3 className="text-lg font-semibold mb-2">Size:</h3>
                 <div className="flex space-x-2">
@@ -119,7 +140,7 @@ const ProductDetails = () => {
                 </div>
               </div>
 
-              {/* เลือกจำนวนสินค้า */}
+              {/* จำนวนสินค้า */}
               <div className="flex items-center gap-4 mt-8 mb-8">
                 <button
                   onClick={decreaseQty}
@@ -148,7 +169,7 @@ const ProductDetails = () => {
                 </span>
               </div>
 
-              {/* ปุ่มเพิ่มลงตะกร้า */}
+              {/* ปุ่มตะกร้า */}
               <div className="flex space-x-4 mb-6 mt-7">
                 <button
                   className="bg-indigo-600 flex gap-2 items-center text-white px-6 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
@@ -190,7 +211,7 @@ const ProductDetails = () => {
                 </p>
               </div>
 
-              {/* แจ้งเตือนให้ล็อกอิน */}
+              {/* รีวิว */}
               {isAuthenticated ? (
                 <NewReview productId={product?._id} />
               ) : (
@@ -205,6 +226,8 @@ const ProductDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* รีวิวรายการ */}
       {product?.reviews?.length > 0 && (
         <ListReviews reviews={product?.reviews} />
       )}
